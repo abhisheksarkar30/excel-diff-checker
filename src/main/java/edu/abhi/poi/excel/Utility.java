@@ -33,8 +33,6 @@ public class Utility {
 		
 		System.out.println(String.format("Diff at cell[%s] of sheet[%s]", cell1.getReference(), sheet.getSheetName()));
 		
-		ExcelDiffChecker.diffFound = true;
-		
 		if(!commentFlag) {
 			System.out.println(String.format("Expected: [%s], Found: [%s]", getCellValue(cell1), getCellValue(cell2)));
 			return;

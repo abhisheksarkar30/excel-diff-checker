@@ -16,8 +16,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class ExcelDiffChecker {
 
-	static boolean diffFound = false;
-	static boolean commentFlag = true;
+	private static boolean success = true;
+	private static boolean diffFound = false;
+	private static boolean commentFlag = true;
 
 	public static void main(String[] args) {
 
@@ -26,8 +27,6 @@ public class ExcelDiffChecker {
 		commentFlag = args.length == 2;
 
 		String RESULT_FILE = FILE_NAME1.substring(0, FILE_NAME1.lastIndexOf(".")) + " vs " + FILE_NAME2;
-
-		boolean success = true;
 
 		File resultFile = new File(RESULT_FILE);
 		if(resultFile.exists())
@@ -81,14 +80,17 @@ public class ExcelDiffChecker {
 								if(Utility.hasContent(cell2)) {
 									if(cell1 == null)
 										cell1 = row1.createCell(columnIndex);
-
+									
+									diffFound = true;
 									Utility.processDiff(cell1, cell2, commentFlag);
 								}
 							} else if(Utility.hasNoContent(cell2)) {
 								if(Utility.hasContent(cell1)) {
+									diffFound = true;
 									Utility.processDiff(cell1, null, commentFlag);
 								}
 							} else if(!cell1.getRawValue().equals(cell2.getRawValue())) {
+								diffFound = true;
 								Utility.processDiff(cell1, cell2, commentFlag);
 							}
 						}
