@@ -25,8 +25,7 @@ public class ExcelDiffChecker {
 		String FILE_NAME2 = args[1];
 		commentFlag = args.length == 2;
 
-		String RESULT_FILE = FILE_NAME1.substring(0, FILE_NAME1.lastIndexOf(".")) + " vs " +
-				FILE_NAME2;
+		String RESULT_FILE = FILE_NAME1.substring(0, FILE_NAME1.lastIndexOf(".")) + " vs " + FILE_NAME2;
 
 		boolean success = true;
 
@@ -83,14 +82,14 @@ public class ExcelDiffChecker {
 									if(cell1 == null)
 										cell1 = row1.createCell(columnIndex);
 
-									Utility.addComment(resultWorkbook, sheet1, rowIndex, cell1, "SYSTEM", cell2);
+									Utility.processDiff(cell1, cell2, commentFlag);
 								}
 							} else if(Utility.hasNoContent(cell2)) {
 								if(Utility.hasContent(cell1)) {
-									Utility.addComment(resultWorkbook, sheet1, rowIndex, cell1, "SYSTEM", null);
+									Utility.processDiff(cell1, null, commentFlag);
 								}
 							} else if(!cell1.getRawValue().equals(cell2.getRawValue())) {
-								Utility.addComment(resultWorkbook, sheet1, rowIndex, cell1, "SYSTEM", cell2);
+								Utility.processDiff(cell1, cell2, commentFlag);
 							}
 						}
 					}

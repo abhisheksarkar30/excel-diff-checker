@@ -10,11 +10,10 @@ import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 
 /**
- * @author abhis
+ * @author abhishek sarkar
  *
  */
 public class Utility {
@@ -28,33 +27,35 @@ public class Utility {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static void addComment(Workbook workbook, Sheet sheet, int rowIndex, XSSFCell cell1, String author, XSSFCell cell2) throws Exception {
+	public static void processDiff(XSSFCell cell1, XSSFCell cell2, boolean commentFlag) throws Exception {
+		
+		Sheet sheet = cell1.getSheet();
 		
 		System.out.println(String.format("Diff at cell[%s] of sheet[%s]", cell1.getReference(), sheet.getSheetName()));
 		
 		ExcelDiffChecker.diffFound = true;
 		
-		if(!ExcelDiffChecker.commentFlag) {
+		if(!commentFlag) {
 			System.out.println(String.format("Expected: [%s], Found: [%s]", getCellValue(cell1), getCellValue(cell2)));
 			return;
 		}
 		
-		CreationHelper factory = workbook.getCreationHelper();
+		CreationHelper factory = sheet.getWorkbook().getCreationHelper();
 	    //get an existing cell or create it otherwise:
 	
 	    ClientAnchor anchor = factory.createClientAnchor();
 	    //i found it useful to show the comment box at the bottom right corner
 	    anchor.setCol1(cell1.getColumnIndex() + 1); //the box of the comment starts at this given column...
 	    anchor.setCol2(cell1.getColumnIndex() + 3); //...and ends at that given column
-	    anchor.setRow1(rowIndex + 1); //one row below the cell...
-	    anchor.setRow2(rowIndex + 5); //...and 4 rows high
+	    anchor.setRow1(cell1.getRowIndex() + 1); //one row below the cell...
+	    anchor.setRow2(cell1.getRowIndex() + 5); //...and 4 rows high
 	
 	    Drawing drawing = sheet.createDrawingPatriarch();
 	    Comment comment = drawing.createCellComment(anchor);
 	    
 	    //set the comment text and author
 	    comment.setString(factory.createRichTextString("Found " + Utility.getCellValue(cell2)));
-	    comment.setAuthor(author);
+	    comment.setAuthor("SYSTEM");
 	
 	    cell1.setCellComment(comment);
 	}

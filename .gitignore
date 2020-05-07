@@ -80,3 +80,4 @@ local.properties
 # Custom
 !apps/*
 /target/
+*.xls*
