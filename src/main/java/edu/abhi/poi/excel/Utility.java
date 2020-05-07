@@ -3,7 +3,6 @@
  */
 package edu.abhi.poi.excel;
 
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Comment;
@@ -29,7 +28,17 @@ public class Utility {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static void addComment(Workbook workbook, Sheet sheet, int rowIndex, Cell cell1, String author, XSSFCell cell2) throws Exception {
+	public static void addComment(Workbook workbook, Sheet sheet, int rowIndex, XSSFCell cell1, String author, XSSFCell cell2) throws Exception {
+		
+		System.out.println(String.format("Diff at cell[%s] of sheet[%s]", cell1.getReference(), sheet.getSheetName()));
+		
+		ExcelDiffChecker.diffFound = true;
+		
+		if(!ExcelDiffChecker.commentFlag) {
+			System.out.println(String.format("Expected: [%s], Found: [%s]", getCellValue(cell1), getCellValue(cell2)));
+			return;
+		}
+		
 		CreationHelper factory = workbook.getCreationHelper();
 	    //get an existing cell or create it otherwise:
 	
@@ -48,8 +57,6 @@ public class Utility {
 	    comment.setAuthor(author);
 	
 	    cell1.setCellComment(comment);
-	    
-	    ExcelDiffChecker.diffFound = true;
 	}
 
 	public static String getCellValue(XSSFCell cell) throws Exception {

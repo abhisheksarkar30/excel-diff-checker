@@ -15,13 +15,15 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  *
  */
 public class ExcelDiffChecker {
-	
+
 	static boolean diffFound = false;
+	static boolean commentFlag = true;
 
 	public static void main(String[] args) {
 
 		String FILE_NAME1 = args[0];
 		String FILE_NAME2 = args[1];
+		commentFlag = args.length == 2;
 
 		String RESULT_FILE = FILE_NAME1.substring(0, FILE_NAME1.lastIndexOf(".")) + " vs " +
 				FILE_NAME2;
@@ -60,7 +62,7 @@ public class ExcelDiffChecker {
 					for(int rowIndex = 0; rowIndex <= sheet1.getLastRowNum(); rowIndex++) {
 						XSSFRow row1 = (XSSFRow) sheet1.getRow(rowIndex);
 						XSSFRow row2 = (XSSFRow) sheet2.getRow(rowIndex);
-						
+
 						if(row1 == null || row2 == null) {
 							if(row1 != row2) 
 								System.out.println("Both rows are not null at rowIndex = " + rowIndex);
@@ -80,44 +82,37 @@ public class ExcelDiffChecker {
 								if(Utility.hasContent(cell2)) {
 									if(cell1 == null)
 										cell1 = row1.createCell(columnIndex);
-									System.out.println(String.format("Diff at cell[%s] of sheet[%s]", 
-											cell1.getReference(), sheet1.getSheetName()));
-									
+
 									Utility.addComment(resultWorkbook, sheet1, rowIndex, cell1, "SYSTEM", cell2);
 								}
 							} else if(Utility.hasNoContent(cell2)) {
 								if(Utility.hasContent(cell1)) {
-									System.out.println(String.format("Diff at cell[%s] of sheet[%s]", 
-											cell1.getReference(), sheet1.getSheetName()));
-
 									Utility.addComment(resultWorkbook, sheet1, rowIndex, cell1, "SYSTEM", null);
 								}
 							} else if(!cell1.getRawValue().equals(cell2.getRawValue())) {
-								System.out.println(String.format("Diff at cell[%s] of sheet[%s]", 
-										cell1.getReference(), sheet1.getSheetName()));
-								
 								Utility.addComment(resultWorkbook, sheet1, rowIndex, cell1, "SYSTEM", cell2);
 							}
 						}
 					}
 				}
-	        
-	        try (FileOutputStream outputStream = new FileOutputStream(RESULT_FILE)) {
-	        	resultWorkbook.write(outputStream);
-	        }
+
+			if(success) {
+				if(diffFound) {
+					if(commentFlag) {
+						try (FileOutputStream outputStream = new FileOutputStream(RESULT_FILE)) {
+							resultWorkbook.write(outputStream);
+							System.out.println("Diff excel has been generated!");
+						}
+					}
+				} else 
+					System.out.println("No diff found!");
+			}
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
-			success = false;
-		} finally {
-			if(success && diffFound)
-				System.out.println("Diff excel has been generated!");
-			else {
-				if(success)
-					System.out.println("No diff found!");
+			
+			if(resultFile.exists())
 				resultFile.delete();
-			}
 		}
-
 	}
-	
+
 }
