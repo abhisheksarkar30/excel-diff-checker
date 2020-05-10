@@ -13,8 +13,6 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 /**
  * @author abhishek sarkar
@@ -31,14 +29,14 @@ public class Utility {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static void processDiffForColumn(XSSFCell cell1, boolean commentFlag, String note) throws Exception {
+	public static void processDiffForColumn(XSSFCell cell1, boolean commentFlag, String note, StringBuilder sb) throws Exception {
 		
 		Sheet sheet = cell1.getSheet();
 		
-		System.out.println(String.format("Diff at cell[%s] of sheet[%s]", cell1.getReference(), sheet.getSheetName()));
+		sb.append(String.format("Diff at cell[%s] of sheet[%s]\n", cell1.getReference(), sheet.getSheetName()));
 		
 		if(!commentFlag) {
-			System.out.println(String.format("Expected: [%s], Found: [%s]", getCellValue(cell1), note));
+			sb.append(String.format("Expected: [%s], Found: [%s]\n", getCellValue(cell1), note));
 			return;
 		}
 		

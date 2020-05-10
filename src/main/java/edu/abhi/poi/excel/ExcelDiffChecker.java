@@ -3,11 +3,14 @@ package edu.abhi.poi.excel;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -37,7 +40,7 @@ public class ExcelDiffChecker {
 		try(XSSFWorkbook resultWorkbook = new XSSFWorkbook(new FileInputStream(new File(FILE_NAME1)));
 				XSSFWorkbook workbook2 = new XSSFWorkbook(new FileInputStream(new File(FILE_NAME2)))) {
 
-			processAllSheets(resultWorkbook, workbook2);
+			diffFound = CallableValue.analyzeResult(processAllSheets(resultWorkbook, workbook2));
 
 			if(diffFound) {
 				if(commentFlag) {
@@ -53,76 +56,26 @@ public class ExcelDiffChecker {
 		}
 	}
 
-	private static void processAllSheets(XSSFWorkbook resultWorkbook, XSSFWorkbook workbook2) throws Exception {
-
+	private static List<Future<CallableValue>> processAllSheets(XSSFWorkbook resultWorkbook, XSSFWorkbook workbook2) throws Exception {
+		List<SheetProcessorTask> tasks = new ArrayList<>();
+		
 		Consumer<Sheet> consumer = sheet1 -> {
 			XSSFSheet sheet2 = (XSSFSheet) workbook2.getSheet(sheet1.getSheetName());
 
 			if(sheet2 == null) {
 				System.out.println(String.format("Sheet[%s] doesn't exist in workbook[%s]", sheet1.getSheetName(), FILE_NAME2));
 			} else
-				try {
-					processAllRows((XSSFSheet) sheet1, sheet2);
-				} catch (Exception e) {
-					e.printStackTrace(System.out);
-				}
+				tasks.add(new SheetProcessorTask((XSSFSheet) sheet1, sheet2, commentFlag));
 		};
 
 		resultWorkbook.forEach(consumer);
-	}
-
-	private static void processAllRows(XSSFSheet sheet1, XSSFSheet sheet2) throws Exception {
-		for(int rowIndex = 0; rowIndex <= sheet1.getLastRowNum(); rowIndex++) {
-			XSSFRow row1 = (XSSFRow) sheet1.getRow(rowIndex);
-			XSSFRow row2 = (XSSFRow) sheet2.getRow(rowIndex);
-
-			if(row1 == null || row2 == null) {
-				if(!(row1 == null && row2 ==null)) {
-					diffFound = true;
-					processNullRow(sheet1, rowIndex, row2);
-				}
-				continue;
-			}
-
-			processAllColumns(row1, row2);
-		}
-	}
-
-	private static void processAllColumns(XSSFRow row1, XSSFRow row2) throws Exception {
-		for(int columnIndex = 0; columnIndex <= row1.getLastCellNum(); columnIndex++) {
-			XSSFCell cell1 = (XSSFCell) row1.getCell(columnIndex);
-			XSSFCell cell2 = (XSSFCell) row2.getCell(columnIndex);
-
-			if(Utility.hasNoContent(cell1)) {
-				if(Utility.hasContent(cell2)) {
-					diffFound = true;
-					Utility.processDiffForColumn(cell1 == null? row1.createCell(columnIndex) : cell1, commentFlag, Utility.getCellValue(cell2));
-				}
-			} else if(Utility.hasNoContent(cell2)) {
-				if(Utility.hasContent(cell1)) {
-					diffFound = true;
-					Utility.processDiffForColumn(cell1, commentFlag, Utility.getCellValue(cell2));
-				}
-			} else if(!cell1.getRawValue().equals(cell2.getRawValue())) {
-				diffFound = true;
-				Utility.processDiffForColumn(cell1, commentFlag, Utility.getCellValue(cell2));
-			}
-		}
-	}
-
-	public static void processNullRow(XSSFSheet sheet1, int rowIndex, XSSFRow row2) throws Exception {
-		XSSFRow row1 = sheet1.getRow(rowIndex);
-
-		if(row1 == null) {
-			row1 = sheet1.createRow(rowIndex);
-
-			for(int columnIndex = 0; columnIndex <= row2.getLastCellNum(); columnIndex++) {
-				Utility.processDiffForColumn(row1.createCell(0), commentFlag, Utility.getCellValue(row2.getCell(columnIndex)));
-			}
-		} else {
-			XSSFCell cell1 = row1.getCell(0);
-			Utility.processDiffForColumn(cell1 == null? row1.createCell(0) : cell1, commentFlag, "Null row");
-		}
+		
+		int effectiveFixedThreadPoolSize = Math.min(Runtime.getRuntime().availableProcessors(), tasks.size());
+		ExecutorService executor = Executors.newFixedThreadPool(effectiveFixedThreadPoolSize);
+		List<Future<CallableValue>> futures = executor.invokeAll(tasks);
+		executor.shutdown();
+		
+		return futures;
 	}
 
 }
