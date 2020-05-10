@@ -3,6 +3,8 @@
  */
 package edu.abhi.poi.excel;
 
+import java.io.File;
+
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Comment;
@@ -11,6 +13,8 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 /**
  * @author abhishek sarkar
@@ -27,14 +31,14 @@ public class Utility {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static void processDiff(XSSFCell cell1, XSSFCell cell2, boolean commentFlag) throws Exception {
+	public static void processDiffForColumn(XSSFCell cell1, boolean commentFlag, String note) throws Exception {
 		
 		Sheet sheet = cell1.getSheet();
 		
 		System.out.println(String.format("Diff at cell[%s] of sheet[%s]", cell1.getReference(), sheet.getSheetName()));
 		
 		if(!commentFlag) {
-			System.out.println(String.format("Expected: [%s], Found: [%s]", getCellValue(cell1), getCellValue(cell2)));
+			System.out.println(String.format("Expected: [%s], Found: [%s]", getCellValue(cell1), note));
 			return;
 		}
 		
@@ -52,7 +56,7 @@ public class Utility {
 	    Comment comment = drawing.createCellComment(anchor);
 	    
 	    //set the comment text and author
-	    comment.setString(factory.createRichTextString("Found " + Utility.getCellValue(cell2)));
+	    comment.setString(factory.createRichTextString("Found " + note));
 	    comment.setAuthor("SYSTEM");
 	
 	    cell1.setCellComment(comment);
@@ -84,6 +88,13 @@ public class Utility {
 				cell.getCellType(), cell.getSheet().getSheetName()));
 	    }
 		return content;
+	}
+	
+	public static boolean deleteIfExists(File file) {
+		if(file.exists())
+			return file.delete();
+		
+		return false;		
 	}
 
 }
