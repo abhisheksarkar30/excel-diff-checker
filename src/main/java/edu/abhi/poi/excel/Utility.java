@@ -30,68 +30,70 @@ public class Utility {
 
 	@SuppressWarnings("rawtypes")
 	public static void processDiffForColumn(XSSFCell cell1, boolean commentFlag, String note, StringBuilder sb) throws Exception {
-		
+
 		Sheet sheet = cell1.getSheet();
-		
+
 		sb.append(String.format("Diff at cell[%s] of sheet[%s]\n", cell1.getReference(), sheet.getSheetName()));
-		
+
 		if(!commentFlag) {
 			sb.append(String.format("Expected: [%s], Found: [%s]\n", getCellValue(cell1), note));
 			return;
 		}
-		
-		CreationHelper factory = sheet.getWorkbook().getCreationHelper();
-	    //get an existing cell or create it otherwise:
-	
-	    ClientAnchor anchor = factory.createClientAnchor();
-	    //i found it useful to show the comment box at the bottom right corner
-	    anchor.setCol1(cell1.getColumnIndex() + 1); //the box of the comment starts at this given column...
-	    anchor.setCol2(cell1.getColumnIndex() + 3); //...and ends at that given column
-	    anchor.setRow1(cell1.getRowIndex() + 1); //one row below the cell...
-	    anchor.setRow2(cell1.getRowIndex() + 5); //...and 4 rows high
-	
-	    Drawing drawing = sheet.createDrawingPatriarch();
-	    Comment comment = drawing.createCellComment(anchor);
-	    
-	    //set the comment text and author
-	    comment.setString(factory.createRichTextString("Found " + note));
-	    comment.setAuthor("SYSTEM");
-	
-	    cell1.setCellComment(comment);
+
+		synchronized(sheet) {
+			CreationHelper factory = sheet.getWorkbook().getCreationHelper();
+			//get an existing cell or create it otherwise:
+
+			ClientAnchor anchor = factory.createClientAnchor();
+			//i found it useful to show the comment box at the bottom right corner
+			anchor.setCol1(cell1.getColumnIndex() + 1); //the box of the comment starts at this given column...
+			anchor.setCol2(cell1.getColumnIndex() + 3); //...and ends at that given column
+			anchor.setRow1(cell1.getRowIndex() + 1); //one row below the cell...
+			anchor.setRow2(cell1.getRowIndex() + 5); //...and 4 rows high
+
+			Drawing drawing = sheet.createDrawingPatriarch();
+			Comment comment = drawing.createCellComment(anchor);
+
+			//set the comment text and author
+			comment.setString(factory.createRichTextString("Found " + note));
+			comment.setAuthor("SYSTEM");
+
+			cell1.setCellComment(comment);
+		}
 	}
 
 	public static String getCellValue(XSSFCell cell) throws Exception {
 		String content = "";
-		
+
 		CellType cellType = cell.getCellType();
-		
+
 		if(cellType == CellType.FORMULA)
 			cellType = cell.getCachedFormulaResultType();
-		
+
 		switch(cellType) {
 		case BLANK:	content += null;
-			break;
+		break;
 		case BOOLEAN: content += cell.getBooleanCellValue();
-			break;
+		break;
 		case ERROR: content += cell.getErrorCellString();
-			break;
+		break;
 		case STRING: content += cell.getRichStringCellValue();
-			break;
+		break;
 		case NUMERIC: content += DateUtil.isCellDateFormatted(cell) ? cell.getDateCellValue() : 
 			cell.getNumericCellValue();
-			break;
+		break;
 		case _NONE:	content += null;
-			break;
+		break;
 		default: throw new Exception(String.format("Unexpected Cell[%s] Type[%s] of sheet[%s]", cell.getReference(), 
 				cell.getCellType(), cell.getSheet().getSheetName()));
-	    }
+		}
 		return content;
 	}
-	
+
 	public static boolean deleteIfExists(File file) {
 		if(file.exists())
 			return file.delete();
-		
+
 		return false;		
 	}
 

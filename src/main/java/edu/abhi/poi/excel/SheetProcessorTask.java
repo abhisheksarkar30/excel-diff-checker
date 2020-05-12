@@ -58,7 +58,7 @@ public class SheetProcessorTask implements Callable<CallableValue> {
 		for (int columnIndex = 0; columnIndex <= row1.getLastCellNum(); columnIndex++) {
 			XSSFCell cell1 = (XSSFCell) row1.getCell(columnIndex);
 			XSSFCell cell2 = (XSSFCell) row2.getCell(columnIndex);
-
+			
 			if (Utility.hasNoContent(cell1)) {
 				if (Utility.hasContent(cell2)) {
 					crt.setDiffFlag(true);
@@ -68,7 +68,7 @@ public class SheetProcessorTask implements Callable<CallableValue> {
 			} else if (Utility.hasNoContent(cell2)) {
 				if (Utility.hasContent(cell1)) {
 					crt.setDiffFlag(true);
-					Utility.processDiffForColumn(cell1, commentFlag, Utility.getCellValue(cell2), crt.getDiffContainer());
+					Utility.processDiffForColumn(cell1, commentFlag, cell2 == null? null : Utility.getCellValue(cell2), crt.getDiffContainer());
 				}
 			} else if (!cell1.getRawValue().equals(cell2.getRawValue())) {
 				crt.setDiffFlag(true);
@@ -83,7 +83,7 @@ public class SheetProcessorTask implements Callable<CallableValue> {
 		if (row1 == null) {
 			if (row2.getPhysicalNumberOfCells() != 0) {
 				row1 = sheet1.createRow(rowIndex);
-
+				crt.setDiffFlag(true);
 				for (int columnIndex = 0; columnIndex <= row2.getLastCellNum(); columnIndex++) {
 					Utility.processDiffForColumn(row1.createCell(0), commentFlag,
 							Utility.getCellValue(row2.getCell(columnIndex)), crt.getDiffContainer());
@@ -91,6 +91,7 @@ public class SheetProcessorTask implements Callable<CallableValue> {
 			}
 		} else {
 			if (row1.getPhysicalNumberOfCells() != 0) {
+				crt.setDiffFlag(true);
 				XSSFCell cell1 = row1.getCell(0);
 				Utility.processDiffForColumn(cell1 == null ? row1.createCell(0) : cell1, commentFlag, "Null row", crt.getDiffContainer());
 			}
