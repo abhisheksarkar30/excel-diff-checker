@@ -70,7 +70,7 @@ public class SheetProcessorTask implements Callable<CallableValue> {
 					crt.setDiffFlag(true);
 					Utility.processDiffForColumn(cell1, commentFlag, cell2 == null? null : Utility.getCellValue(cell2), crt.getDiffContainer());
 				}
-			} else if (!cell1.getRawValue().equals(cell2.getRawValue())) {
+			} else if (!Utility.getCellValue(cell1).equals(Utility.getCellValue(cell2))) {
 				crt.setDiffFlag(true);
 				Utility.processDiffForColumn(cell1, commentFlag, Utility.getCellValue(cell2), crt.getDiffContainer());
 			}
