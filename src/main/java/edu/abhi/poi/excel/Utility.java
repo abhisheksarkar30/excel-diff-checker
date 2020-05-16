@@ -40,7 +40,7 @@ public class Utility {
 			return;
 		}
 
-		synchronized(sheet) {
+		synchronized(sheet.getWorkbook()) {
 			CreationHelper factory = sheet.getWorkbook().getCreationHelper();
 			//get an existing cell or create it otherwise:
 
