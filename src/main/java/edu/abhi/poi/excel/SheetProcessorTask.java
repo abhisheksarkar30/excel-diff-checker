@@ -16,13 +16,13 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 public class SheetProcessorTask implements Callable<CallableValue> {
 
 	private XSSFSheet sheet1, sheet2;
-	private boolean commentFlag;
+	private boolean remarksOnly;
 	private CallableValue crt;
 
 	public SheetProcessorTask(XSSFSheet sheet1, XSSFSheet sheet2, boolean commentFlag) {
 		this.sheet1 = sheet1;
 		this.sheet2 = sheet2;
-		this.commentFlag = commentFlag;
+		this.remarksOnly = commentFlag;
 	}
 
 	@Override
@@ -62,17 +62,17 @@ public class SheetProcessorTask implements Callable<CallableValue> {
 			if (Utility.hasNoContent(cell1)) {
 				if (Utility.hasContent(cell2)) {
 					crt.setDiffFlag(true);
-					Utility.processDiffForColumn(cell1 == null ? row1.createCell(columnIndex) : cell1, commentFlag,
+					Utility.processDiffForColumn(cell1 == null ? row1.createCell(columnIndex) : cell1, remarksOnly,
 							Utility.getCellValue(cell2), crt.getDiffContainer());
 				}
 			} else if (Utility.hasNoContent(cell2)) {
 				if (Utility.hasContent(cell1)) {
 					crt.setDiffFlag(true);
-					Utility.processDiffForColumn(cell1, commentFlag, cell2 == null? null : Utility.getCellValue(cell2), crt.getDiffContainer());
+					Utility.processDiffForColumn(cell1, remarksOnly, cell2 == null? null : Utility.getCellValue(cell2), crt.getDiffContainer());
 				}
 			} else if (!Utility.getCellValue(cell1).equals(Utility.getCellValue(cell2))) {
 				crt.setDiffFlag(true);
-				Utility.processDiffForColumn(cell1, commentFlag, Utility.getCellValue(cell2), crt.getDiffContainer());
+				Utility.processDiffForColumn(cell1, remarksOnly, Utility.getCellValue(cell2), crt.getDiffContainer());
 			}
 		}
 	}
@@ -85,7 +85,7 @@ public class SheetProcessorTask implements Callable<CallableValue> {
 				row1 = sheet1.createRow(rowIndex);
 				crt.setDiffFlag(true);
 				for (int columnIndex = 0; columnIndex <= row2.getLastCellNum(); columnIndex++) {
-					Utility.processDiffForColumn(row1.createCell(0), commentFlag,
+					Utility.processDiffForColumn(row1.createCell(0), remarksOnly,
 							Utility.getCellValue(row2.getCell(columnIndex)), crt.getDiffContainer());
 				}
 			}
@@ -93,7 +93,7 @@ public class SheetProcessorTask implements Callable<CallableValue> {
 			if (row1.getPhysicalNumberOfCells() != 0) {
 				crt.setDiffFlag(true);
 				XSSFCell cell1 = row1.getCell(0);
-				Utility.processDiffForColumn(cell1 == null ? row1.createCell(0) : cell1, commentFlag, "Null row", crt.getDiffContainer());
+				Utility.processDiffForColumn(cell1 == null ? row1.createCell(0) : cell1, remarksOnly, "Null row", crt.getDiffContainer());
 			}
 		}
 	}

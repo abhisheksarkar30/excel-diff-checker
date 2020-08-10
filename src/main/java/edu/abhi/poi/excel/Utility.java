@@ -29,13 +29,13 @@ public class Utility {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static void processDiffForColumn(XSSFCell cell1, boolean commentFlag, String note, StringBuilder sb) throws Exception {
+	public static void processDiffForColumn(XSSFCell cell1, boolean remarksOnly, String note, StringBuilder sb) throws Exception {
 
 		Sheet sheet = cell1.getSheet();
 
 		sb.append(String.format("Diff at cell[%s] of sheet[%s]\n", cell1.getReference(), sheet.getSheetName()));
 
-		if(!commentFlag) {
+		if(remarksOnly) {
 			sb.append(String.format("Expected: [%s], Found: [%s]\n", getCellValue(cell1), note));
 			return;
 		}
