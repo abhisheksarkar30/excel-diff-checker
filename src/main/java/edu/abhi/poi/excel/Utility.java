@@ -33,11 +33,13 @@ public class Utility {
 
 		Sheet sheet = cell1.getSheet();
 
-		sb.append(String.format("Diff at cell[%s] of sheet[%s]\n", cell1.getReference(), sheet.getSheetName()));
-
 		if(remarksOnly) {
-			sb.append(String.format("Expected: [%s], Found: [%s]\n", getCellValue(cell1), note));
+			sb.append(String.format("\nDiff at Cell[%s] of Sheet[%s]", cell1.getReference(), sheet.getSheetName()));
+			sb.append(String.format("\nExpected: [%s], Found: [%s]", getCellValue(cell1), note));
 			return;
+		} else {
+			sb.append(sb.length() > 0 ? " " : String.format("\nDiff at Row[%s] of Sheet[%s]: ", (cell1.getRowIndex() + 1), sheet.getSheetName()));
+			sb.append(cell1.getReference());
 		}
 
 		synchronized(sheet.getWorkbook()) {
@@ -84,7 +86,7 @@ public class Utility {
 		break;
 		case _NONE:	content += null;
 		break;
-		default: throw new Exception(String.format("Unexpected Cell[%s] Type[%s] of sheet[%s]", cell.getReference(), 
+		default: throw new Exception(String.format("Unexpected Cell[%s] Type[%s] of Sheet[%s]", cell.getReference(), 
 				cell.getCellType(), cell.getSheet().getSheetName()));
 		}
 		return content;

@@ -55,7 +55,7 @@ public class SheetProcessorTask implements Callable<CallableValue> {
 	}
 
 	private void processAllColumns(XSSFRow row1, XSSFRow row2) throws Exception {
-		StringBuilder sb = new StringBuilder();
+		StringBuilder rowRemarks = new StringBuilder();
 		boolean isRow1Blank = true, isRow2Blank = true;
 		
 		for (int columnIndex = 0; columnIndex <= row1.getLastCellNum(); columnIndex++) {
@@ -67,37 +67,37 @@ public class SheetProcessorTask implements Callable<CallableValue> {
 					isRow2Blank = false;
 					crt.setDiffFlag(true);
 					Utility.processDiffForColumn(cell1 == null ? row1.createCell(columnIndex) : cell1, remarksOnly,
-							Utility.getCellValue(cell2), sb);
+							Utility.getCellValue(cell2), rowRemarks);
 				}
 			} else if (Utility.hasNoContent(cell2)) {
 				if (Utility.hasContent(cell1)) {
 					isRow1Blank = false;
 					crt.setDiffFlag(true);
-					Utility.processDiffForColumn(cell1, remarksOnly, cell2 == null? null : Utility.getCellValue(cell2), sb);
+					Utility.processDiffForColumn(cell1, remarksOnly, cell2 == null? null : Utility.getCellValue(cell2), rowRemarks);
 				}
 			} else {
 				isRow1Blank = isRow2Blank = false;
 				
 				if (!Utility.getCellValue(cell1).equals(Utility.getCellValue(cell2))) {
 					crt.setDiffFlag(true);
-					Utility.processDiffForColumn(cell1, remarksOnly, Utility.getCellValue(cell2), sb);
+					Utility.processDiffForColumn(cell1, remarksOnly, Utility.getCellValue(cell2), rowRemarks);
 				}
 			}
 		}
 		
 		if(!isRow1Blank && isRow2Blank)
-			crt.getDiffContainer().append(String.format("Removed Row[%s] in sheet[%s]\n",
+			crt.getDiffContainer().append(String.format("\nRemoved Row[%s] of Sheet[%s]",
 					(row1.getRowNum() + 1), sheet1.getSheetName()));
 		else if(isRow1Blank && !isRow2Blank)
-			crt.getDiffContainer().append(String.format("Added Row[%s] in sheet[%s]\n",
+			crt.getDiffContainer().append(String.format("\nAdded Row[%s] in Sheet[%s]",
 					(row1.getRowNum() + 1), sheet1.getSheetName()));
 		else
-			crt.getDiffContainer().append(sb);
+			crt.getDiffContainer().append(rowRemarks);
 	}
 
 	public void processNullRow(XSSFSheet sheet1, int rowIndex, XSSFRow row2) throws Exception {
 		XSSFRow row1 = sheet1.getRow(rowIndex);
-		StringBuilder sb = new StringBuilder();
+		StringBuilder rowRemarks = new StringBuilder();
 		
 		if (row1 == null) {
 			if (row2.getPhysicalNumberOfCells() != 0) {
@@ -105,17 +105,17 @@ public class SheetProcessorTask implements Callable<CallableValue> {
 				crt.setDiffFlag(true);
 				for (int columnIndex = 0; columnIndex <= row2.getLastCellNum(); columnIndex++) {
 					Utility.processDiffForColumn(row1.createCell(0), remarksOnly,
-							Utility.getCellValue(row2.getCell(columnIndex)), sb);
+							Utility.getCellValue(row2.getCell(columnIndex)), rowRemarks);
 				}
-				crt.getDiffContainer().append(String.format("Added Row[%s] in sheet[%s]\n",
+				crt.getDiffContainer().append(String.format("\nAdded Row[%s] in Sheet[%s]",
 						(row1.getRowNum() + 1), sheet1.getSheetName()));
 			}
 		} else {
 			if (row1.getPhysicalNumberOfCells() != 0) {
 				crt.setDiffFlag(true);
 				XSSFCell cell1 = row1.getCell(0);
-				Utility.processDiffForColumn(cell1 == null ? row1.createCell(0) : cell1, remarksOnly, "Null row", sb);
-				crt.getDiffContainer().append(String.format("Removed Row[%s] in sheet[%s]\n",
+				Utility.processDiffForColumn(cell1 == null ? row1.createCell(0) : cell1, remarksOnly, "Null row", rowRemarks);
+				crt.getDiffContainer().append(String.format("\nRemoved Row[%s] of Sheet[%s]",
 						(row1.getRowNum() + 1), sheet1.getSheetName()));
 			}
 		}
