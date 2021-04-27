@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.abhi.poi</groupId>
 	<artifactId>excel-diff-checker</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1</version>
 	<name>excel-diff-checker</name>
 	<url>http://maven.apache.org</url>
 
@@ -34,6 +34,14 @@
 		  <version>1.4</version>
 		</dependency>
 	</dependencies>
+
+	<distributionManagement>
+	   <repository>
+		 <id>github</id>
+		 <name>GitHub Abhishek Sarkar Apache Maven Packages</name>
+		 <url>https://maven.pkg.github.com/abhisheksarkar30/${project.name}</url>
+	   </repository>
+	</distributionManagement>
 
 	<build>
 		<plugins>
