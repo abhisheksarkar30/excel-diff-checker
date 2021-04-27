@@ -20,14 +20,6 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
  */
 public class Utility {
 
-	public static boolean hasNoContent(XSSFCell cell) {
-		return cell == null || cell.getRawValue() == null || cell.getRawValue().equals("");
-	}
-
-	public static boolean hasContent(XSSFCell cell) {
-		return cell != null && cell.getRawValue() != null && !cell.getRawValue().equals("");
-	}
-
 	@SuppressWarnings("rawtypes")
 	public static void processDiffForColumn(XSSFCell cell1, boolean remarksOnly, String note, StringBuilder sb) throws Exception {
 
@@ -57,7 +49,7 @@ public class Utility {
 			Comment comment = drawing.createCellComment(anchor);
 
 			//set the comment text and author
-			comment.setString(factory.createRichTextString("Found " + note));
+			comment.setString(factory.createRichTextString("Found: " + note));
 			comment.setAuthor("SYSTEM");
 
 			cell1.setCellComment(comment);
@@ -67,27 +59,23 @@ public class Utility {
 	public static String getCellValue(XSSFCell cell) throws Exception {
 		String content = "";
 
+		if(cell == null) return content;
+
 		CellType cellType = cell.getCellType();
 
 		if(cellType == CellType.FORMULA)
 			cellType = cell.getCachedFormulaResultType();
 
 		switch(cellType) {
-		case BLANK:	content += null;
-		break;
-		case BOOLEAN: content += cell.getBooleanCellValue();
-		break;
-		case ERROR: content += cell.getErrorCellString();
-		break;
-		case STRING: content += cell.getRichStringCellValue();
-		break;
-		case NUMERIC: content += DateUtil.isCellDateFormatted(cell) ? cell.getDateCellValue() : 
-			cell.getNumericCellValue();
-		break;
-		case _NONE:	content += null;
-		break;
-		default: throw new Exception(String.format("Unexpected Cell[%s] Type[%s] of Sheet[%s]", cell.getReference(), 
-				cell.getCellType(), cell.getSheet().getSheetName()));
+		case BLANK:
+		case _NONE: break;
+		case BOOLEAN: content += cell.getBooleanCellValue(); break;
+		case ERROR: content += trimToEmpty(cell.getErrorCellString()); break;
+		case STRING: content += trimToEmpty(cell.getRichStringCellValue().getString()); break;
+		case NUMERIC: content += DateUtil.isCellDateFormatted(cell) ? cell.getDateCellValue() :
+				!content.equals(cell.getRawValue())? cell.getNumericCellValue() : content; break;
+		default: throw new Exception(String.format("Unexpected Cell[%s] Type[%s] of Sheet[%s]", cell.getReference(),
+			cell.getCellType(), cell.getSheet().getSheetName()));
 		}
 		return content;
 	}
@@ -97,6 +85,10 @@ public class Utility {
 			return file.delete();
 
 		return false;		
+	}
+
+	private static String trimToEmpty(String value) {
+		return value == null? "" : value.trim();
 	}
 
 }

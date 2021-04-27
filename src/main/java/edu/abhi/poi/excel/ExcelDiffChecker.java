@@ -116,7 +116,7 @@ public class ExcelDiffChecker {
 		List<SheetProcessorTask> tasks = new ArrayList<>();
 		
 		Consumer<Sheet> consumer = sheet1 -> {
-			XSSFSheet sheet2 = (XSSFSheet) workbook2.getSheet(sheet1.getSheetName());
+			XSSFSheet sheet2 = workbook2.getSheet(sheet1.getSheetName());
 
 			if(sheet2 == null) {
 				System.out.println(String.format("Sheet[%s] doesn't exist in workbook[%s]", sheet1.getSheetName(), FILE_NAME2));
@@ -135,13 +135,13 @@ public class ExcelDiffChecker {
 		List<String> sheets = Arrays.asList(specifiedSheets.split(","));
 		
 		Consumer<String> consumer = sheetName -> {
-			XSSFSheet sheet1 = (XSSFSheet) resultWorkbook.getSheet(sheetName);
-			XSSFSheet sheet2 = (XSSFSheet) workbook2.getSheet(sheetName);
+			XSSFSheet sheet1 = resultWorkbook.getSheet(sheetName);
+			XSSFSheet sheet2 = workbook2.getSheet(sheetName);
 
 			if(sheet1 == null || sheet2 == null ) {
 				System.out.println(String.format("Sheet[%s] doesn't exist in both workbooks", sheetName));
 			} else
-				tasks.add(new SheetProcessorTask((XSSFSheet) sheet1, sheet2, remarksOnly));
+				tasks.add(new SheetProcessorTask(sheet1, sheet2, remarksOnly));
 		};
 
 		sheets.forEach(consumer);
