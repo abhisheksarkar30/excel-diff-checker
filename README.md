@@ -14,7 +14,7 @@ This is a simple java tool to check diff between two excel files.
 Java 8+
 
 ## Usage
-java -jar excel-diff-checker.jar \<File1-path> \<File2-path> [-r] [-s \<Comma-separated sheet-names>]-> where File1 and File2 are mandatory, options: 'r' & 's' are optional.
+java -jar excel-diff-checker.jar -b "[file 1]" -t "[file2]" -r -s sheet1-> where -b, -t File1 and File2 are mandatory, options: 'r' & 's' are optional.
 
 ## Notes to follow
  - This tool is not having any complex algorithm to check diff, so won't be able to detect column/row addition/deletion.
