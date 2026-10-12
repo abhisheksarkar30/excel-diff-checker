@@ -19,6 +19,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -65,7 +66,11 @@ public class ExcelDiffChecker {
 				}
 			} else 
 				System.out.println("No diff found!");
-		} catch (Exception e) {
+				} catch (Exception e) {
+			if (e instanceof NotOfficeXmlFileException) {
+				System.err.println("Invalid or unsupported file, only .xlsx files are supported.");
+				System.exit(1);
+			}
 			e.printStackTrace(System.out);
 		}
 	}
